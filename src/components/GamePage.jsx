@@ -10,7 +10,7 @@ function GamePage() {
 
   // 將遊戲狀態存放在 ref 中，避免因頻繁更新 useState 而觸發重渲染
   const gameStateRef = useRef({
-    player: { x: 50, y: 700, width: 50, height: 50, vy: 0 },
+    player: { x: 50, y: 500, width: 50, height: 50, vy: 0 },
     obstacles: [],
     items: [],
     spawnCounter: 0,
@@ -19,7 +19,7 @@ function GamePage() {
   });
 
   const [jumping, setJumping] = useState(false);
-  const gravity = 0.1;
+  const gravity = 0.15;
   const jumpPower = -8;
 
   // 輔助函式：預先載入圖片，回傳 Promise 陣列
@@ -53,10 +53,10 @@ function GamePage() {
 
         // 生成障礙物與道具函數
         const spawnObstacle = () => {
-          gameStateRef.current.obstacles.push({ x: canvas.width, y: 700, width: 50, height: 50 });
+          gameStateRef.current.obstacles.push({ x: canvas.width, y: 500, width: 50, height: 50 });
         };
         const spawnItem = (type) => {
-          gameStateRef.current.items.push({ x: canvas.width, y:  700 - Math.random() *250, width: 30, height: 30, type });
+          gameStateRef.current.items.push({ x: canvas.width, y:  500 - Math.random() *150, width: 30, height: 30, type });
         };
 
         // 遊戲主迴圈
@@ -76,8 +76,8 @@ function GamePage() {
           const player = gameStateRef.current.player;
           player.vy += gravity;
           player.y += player.vy;
-          if (player.y > 700) {
-            player.y = 700;
+          if (player.y > 500) {
+            player.y = 500;
             player.vy = 0;
             setJumping(false); // 結束跳躍狀態
           }
@@ -172,7 +172,7 @@ function GamePage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-200">
-      <canvas ref={canvasRef} width="400" height="800" className="border bg-white" />
+      <canvas ref={canvasRef} width="400" height="600" className="border bg-white" />
       <button onClick={handleJump} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
         起跳
       </button>
