@@ -10,17 +10,17 @@ function GamePage() {
 
   // 將遊戲狀態存放在 ref 中，避免因頻繁更新 useState 而觸發重渲染
   const gameStateRef = useRef({
-    player: { x: 50, y: 500, width: 50, height: 50, vy: 0 },
+    player: { x: 50, y: 500, width: 50, height: 90, vy: 0 },
     obstacles: [],
     items: [],
     spawnCounter: 0,
     score: { prop1: 0, prop2: 0 },
-    lives: 3,
+    lives: 5,
   });
 
   const [jumping, setJumping] = useState(false);
-  const gravity = 0.15;
-  const jumpPower = -8;
+  const gravity = 0.1;
+  const jumpPower = -7;
 
   // 輔助函式：預先載入圖片，回傳 Promise 陣列
   const loadImages = (sources) => {
@@ -44,16 +44,18 @@ function GamePage() {
     loadImages([
       '/assets/player.png',
       '/assets/background.png',
-      '/assets/obstacle.png',
+      '/assets/obstacle1.png',
+      '/assets/obstacle2.png',
+      '/assets/obstacle3.png',
       '/assets/item1.png',
       '/assets/item2.png'
     ])
-      .then(([playerImg, bgImg, obstacleImg, item1Img, item2Img]) => {
+      .then(([playerImg, bgImg, obstacleImg, obstacleImg2, obstacleImg3, item1Img, item2Img]) => {
         if (!isMounted) return;
 
         // 生成障礙物與道具函數
         const spawnObstacle = () => {
-          gameStateRef.current.obstacles.push({ x: canvas.width, y: 500, width: 50, height: 50 });
+          gameStateRef.current.obstacles.push({ x: canvas.width, y: 550, width: 40, height: 40 });
         };
         const spawnItem = (type) => {
           gameStateRef.current.items.push({ x: canvas.width, y:  500 - Math.random() *150, width: 30, height: 30, type });
@@ -85,9 +87,10 @@ function GamePage() {
 
           // 每隔一定時間生成障礙物與道具
           gameStateRef.current.spawnCounter++;
-          if (gameStateRef.current.spawnCounter % 200 === 0) {
+          if (gameStateRef.current.spawnCounter % 400 === 0) {
             Math.random() < 0.5 && spawnObstacle();
           }
+
           if (gameStateRef.current.spawnCounter % 50 === 0 ) {
             if(gameStateRef.current.spawnCounter % 200 !== 0){
               Math.random() < 0.5 ? spawnItem('prop1') : spawnItem('prop2');
@@ -96,7 +99,7 @@ function GamePage() {
 
           // 更新並繪製障礙物，進行碰撞檢測
           gameStateRef.current.obstacles = gameStateRef.current.obstacles.filter((obs) => {
-            obs.x -= 2;
+            obs.x -= 1.5;
             ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
             if (
               player.x < obs.x + obs.width &&
@@ -112,7 +115,7 @@ function GamePage() {
 
           // 更新並繪製道具，進行收集檢測
           gameStateRef.current.items = gameStateRef.current.items.filter((item) => {
-            item.x -= 2;
+            item.x -= 1.5;
             if (item.type === 'prop1') {
               ctx.drawImage(item1Img, item.x, item.y, item.width, item.height);
             } else {
