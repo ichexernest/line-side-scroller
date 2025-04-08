@@ -13,7 +13,7 @@ import {
 import {  drawPixelBar, drawIcons } from '../images/drawUtils';
 
 function GamePage() {
-  const [loaded, setLoaded] = useState(false);
+  // const [loaded, setLoaded] = useState(false);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
   const requestRef = useRef();
@@ -64,7 +64,7 @@ function GamePage() {
 
     loadImages(allImagePaths).then((imgs) => {
       if (!isMounted) return;
-      setLoaded(true);
+      // setLoaded(true);
       const [playerImg, playerJumpImg, bgImg, ...restImgs] = imgs;
       const obstacleImgs = Object.fromEntries(
         OBSTACLE_TYPES.map((type, i) => [type, restImgs[i]])
@@ -229,9 +229,9 @@ const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1];
     <div className="relative flex flex-col items-center justify-center h-screen bg-[#FCB1B2]"  style={{
       backgroundImage: `url(${IMAGE_PATHS.bg})`,
     }}>
-{!loaded ? (
-      <div className="text-3xl text-red-700 font-bold animate-pulse">載入中...</div>
-    ) : (
+{/* {!loaded ? (
+      <div className="text-3xl text-white font-bold animate-pulse">載入中...</div>
+    ) : ( */}
       <>
         <canvas
           ref={canvasRef}
@@ -243,10 +243,10 @@ const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1];
           onClick={handleJump}
           className="p-6 mt-5 w-[350px] shadow-2xl border-rose-600 border-8 font-bold text-3xl bg-red-400 text-white rounded-lg active:bg-rose-500"
         >
-          跳起來！
+          跳起來!
         </button>
       </>
-    )}
+      {/* )} */}
     </div>
   );
 }
