@@ -1,20 +1,47 @@
-export const gameConfig = {
-  // 定義遊戲資源和基本設定
-  images: {
-    character: '/images/character.png', // 替換為您的角色圖片路徑
-    obstacles: [
-      '/images/obstacle1.png', // 替換為您的障礙物圖片路徑
-    ],
-    itemTypeA: '/images/coin.png', // 替換為您的金幣圖片路徑
-    itemTypeB: '/images/gem.png', // 替換為您的寶石圖片路徑
-    background: '/images/background.png', // 替換為您的背景圖片路徑
+// gameConfig.js
+
+export const PLAYER_SIZE = { width: 50, height: 90 };
+export const GROUND_Y = 500;
+
+export const MAX_LIVES = 5;
+export const GAME_DURATION = 45; // 秒數
+
+export const BAR = {
+  width: 250,
+  height: 20,
+  lives: { x: 10, y: 60 },
+  time: { x: 10, y: 90 },
+};
+
+export const ICON = {
+  size: 35,
+  margin: 10,
+  top: 10,
+};
+
+export const ITEM_TYPES = ['prop1', 'prop2', 'prop3', 'prop4', 'prop5'];
+export const OBSTACLE_TYPES = ['prop1', 'prop2', 'prop3'];
+
+export const IMAGE_PATHS = {
+  player: '/assets/player.png',
+  playerJump: '/assets/player_jump.png',
+  background: '/assets/background.png',
+  obstacles: {
+    prop1: '/assets/obstacle1.png',
+    prop2: '/assets/obstacle2.png',
+    prop3: '/assets/obstacle3.png',
   },
-  physics: {
-    gravity: 0.8,
-    jumpForce: -15,
+  items: {
+    prop1: '/assets/item1.png',
+    prop2: '/assets/item2.png',
+    prop3: '/assets/item3.png',
+    prop4: '/assets/item4.png',
+    prop5: '/assets/item5.png',
   },
-  scoring: {
-    itemTypeAValue: 10, // 金幣分數
-    itemTypeBValue: 20, // 寶石分數
-  },
+  life: '/assets/life.png',
+  goal: '/assets/goal.png',
+  success1: '/assets/successCard1.png',
+  success2: '/assets/successCard2.png',
+  fail: '/assets/failCard.png',
+  bg: '/assets//bg-mtd.png',
 };

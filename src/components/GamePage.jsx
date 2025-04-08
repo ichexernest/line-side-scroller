@@ -1,6 +1,16 @@
 // GamePage.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  MAX_LIVES,
+  GAME_DURATION,
+  BAR,
+  ICON,
+  ITEM_TYPES,
+  OBSTACLE_TYPES,
+  IMAGE_PATHS,
+} from '../config/gameConfig';
+import {  drawPixelBar, drawIcons } from '../images/drawUtils';
 
 function GamePage() {
   const canvasRef = useRef(null);
@@ -8,164 +18,204 @@ function GamePage() {
   const requestRef = useRef();
   const startTimeRef = useRef(null);
 
-  // 將遊戲狀態存放在 ref 中，避免因頻繁更新 useState 而觸發重渲染
   const gameStateRef = useRef({
     player: { x: 50, y: 500, width: 50, height: 90, vy: 0 },
     obstacles: [],
     items: [],
     spawnCounter: 0,
-    score: { prop1: 0, prop2: 0 },
-    lives: 5,
+    score: Object.fromEntries(ITEM_TYPES.map((k) => [k, 0])),
+    lives: MAX_LIVES,
+    distance: GAME_DURATION,
   });
 
   const [jumping, setJumping] = useState(false);
   const gravity = 0.1;
   const jumpPower = -7;
 
-  // 輔助函式：預先載入圖片，回傳 Promise 陣列
   const loadImages = (sources) => {
-    const promises = sources.map(src => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`圖片載入失敗: ${src}`));
-      });
-    });
-    return Promise.all(promises);
+    return Promise.all(
+      sources.map(
+        (src) =>
+          new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error(`圖片載入失敗: ${src}`));
+          })
+      )
+    );
   };
 
   useEffect(() => {
-    let isMounted = true; // 防止組件卸載後還在執行
+    let isMounted = true;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
-    // 預先載入圖片
-    loadImages([
-      '/assets/player.png',
-      '/assets/background.png',
-      '/assets/obstacle1.png',
-      '/assets/obstacle2.png',
-      '/assets/obstacle3.png',
-      '/assets/item1.png',
-      '/assets/item2.png'
-    ])
-      .then(([playerImg, bgImg, obstacleImg, obstacleImg2, obstacleImg3, item1Img, item2Img]) => {
-        if (!isMounted) return;
+    const allImagePaths = [
+      IMAGE_PATHS.player,
+      IMAGE_PATHS.playerJump,
+      IMAGE_PATHS.background,
+      ...Object.values(IMAGE_PATHS.obstacles),
+      ...Object.values(IMAGE_PATHS.items),
+      IMAGE_PATHS.life,
+      IMAGE_PATHS.goal,
+    ];
 
-        // 生成障礙物與道具函數
-        const spawnObstacle = () => {
-          gameStateRef.current.obstacles.push({ x: canvas.width, y: 550, width: 40, height: 40 });
-        };
-        const spawnItem = (type) => {
-          gameStateRef.current.items.push({ x: canvas.width, y:  500 - Math.random() *150, width: 30, height: 30, type });
-        };
+    loadImages(allImagePaths).then((imgs) => {
+      if (!isMounted) return;
+      const [playerImg, playerJumpImg, bgImg, ...restImgs] = imgs;
+      const obstacleImgs = Object.fromEntries(
+        OBSTACLE_TYPES.map((type, i) => [type, restImgs[i]])
+      );
+      const itemImgs = Object.fromEntries(
+        ITEM_TYPES.map((type, i) => [type, restImgs[OBSTACLE_TYPES.length + i]])
+      );
 
-        // 遊戲主迴圈
-        const gameLoop = (timestamp) => {
-          if (!startTimeRef.current) startTimeRef.current = timestamp;
-          const elapsed = timestamp - startTimeRef.current;
-          if (elapsed > 30000) { // 遊戲 30 秒結束
-            navigate('/result', { state: { score: gameStateRef.current.score, lives: gameStateRef.current.lives } });
-            return;
-          }
+const lifeImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length]; 
+const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1]; 
 
-          // 清除畫布並繪製背景
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      const spawnObstacle = (type) => {
+        gameStateRef.current.obstacles.push({ x: canvas.width, y: 550, width: 40, height: 40, type });
+      };
 
-          // 更新主角位置與物理效果
-          const player = gameStateRef.current.player;
-          player.vy += gravity;
-          player.y += player.vy;
-          if (player.y > 500) {
-            player.y = 500;
-            player.vy = 0;
-            setJumping(false); // 結束跳躍狀態
-          }
-          ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+      const spawnItem = (type) => {
+        gameStateRef.current.items.push({
+          x: canvas.width,
+          y: 500 - Math.random() * 150,
+          width: 50,
+          height: 50,
+          type,
+        });
+      };
 
-          // 每隔一定時間生成障礙物與道具
-          gameStateRef.current.spawnCounter++;
-          if (gameStateRef.current.spawnCounter % 400 === 0) {
-            Math.random() < 0.5 && spawnObstacle();
-          }
+      const gameLoop = (timestamp) => {
+        if (!startTimeRef.current) startTimeRef.current = timestamp;
+        const elapsed = timestamp - startTimeRef.current;
 
-          if (gameStateRef.current.spawnCounter % 50 === 0 ) {
-            if(gameStateRef.current.spawnCounter % 200 !== 0){
-              Math.random() < 0.5 ? spawnItem('prop1') : spawnItem('prop2');
-            }
-          }
-
-          // 更新並繪製障礙物，進行碰撞檢測
-          gameStateRef.current.obstacles = gameStateRef.current.obstacles.filter((obs) => {
-            obs.x -= 1.5;
-            ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
-            if (
-              player.x < obs.x + obs.width &&
-              player.x + player.width > obs.x &&
-              player.y < obs.y + obs.height &&
-              player.y + player.height > obs.y
-            ) {
-              gameStateRef.current.lives--;
-              return false; // 移除碰撞到的障礙物
-            }
-            return obs.x + obs.width > 0;
+        if (elapsed > GAME_DURATION * 1000) {
+          navigate('/result', {
+            state: {
+              score: gameStateRef.current.score,
+              lives: gameStateRef.current.lives,
+            },
           });
+          return;
+        }
 
-          // 更新並繪製道具，進行收集檢測
-          gameStateRef.current.items = gameStateRef.current.items.filter((item) => {
-            item.x -= 1.5;
-            if (item.type === 'prop1') {
-              ctx.drawImage(item1Img, item.x, item.y, item.width, item.height);
-            } else {
-              ctx.drawImage(item2Img, item.x, item.y, item.width, item.height);
-            }
-            if (
-              player.x < item.x + item.width &&
-              player.x + player.width > item.x &&
-              player.y < item.y + item.height &&
-              player.y + player.height > item.y
-            ) {
-              if (item.type === 'prop1') gameStateRef.current.score.prop1++;
-              else gameStateRef.current.score.prop2++;
-              return false; // 收集後移除該道具
-            }
-            return item.x + item.width > 0;
-          });
+        gameStateRef.current.distance = Math.max(0, GAME_DURATION - Math.floor(elapsed / 1000));
 
-          // 檢查生命數是否歸零
-          if (gameStateRef.current.lives <= 0) {
-            navigate('/result', { state: { score: gameStateRef.current.score, lives: gameStateRef.current.lives } });
-            return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+        const player = gameStateRef.current.player;
+        player.vy += gravity;
+        player.y += player.vy;
+        if (player.y > 500) {
+          player.y = 500;
+          player.vy = 0;
+          setJumping(false);
+        }
+        ctx.drawImage( player.vy !== 0 ? playerJumpImg : playerImg, player.x, player.y, player.width, player.height);
+
+        gameStateRef.current.spawnCounter++;
+        if (gameStateRef.current.spawnCounter % 400 === 0) {
+          const type = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+          spawnObstacle(type);
+        }
+
+        if (gameStateRef.current.spawnCounter % 50 === 0) {
+          if (gameStateRef.current.spawnCounter % 150 !== 0) {
+            const type = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+            spawnItem(type);
           }
+        }
 
-          // 顯示分數與生命數
-          ctx.fillStyle = 'black';
-          ctx.font = '20px Arial';
-          ctx.fillText(
-            `道具1: ${gameStateRef.current.score.prop1}  道具2: ${gameStateRef.current.score.prop2}  生命: ${gameStateRef.current.lives}`,
-            10,
-            30
-          );
+        gameStateRef.current.obstacles = gameStateRef.current.obstacles.filter((obs) => {
+          obs.x -= 1.5;
+          ctx.drawImage(obstacleImgs[obs.type], obs.x, obs.y, obs.width, obs.height);
 
-          requestRef.current = requestAnimationFrame(gameLoop);
-        };
+          const isColliding =
+            player.x < obs.x + obs.width &&
+            player.x + player.width > obs.x &&
+            player.y < obs.y + obs.height &&
+            player.y + player.height > obs.y;
+
+          if (isColliding) {
+            gameStateRef.current.lives--;
+            return false;
+          }
+          return obs.x + obs.width > 0;
+        });
+
+        gameStateRef.current.items = gameStateRef.current.items.filter((item) => {
+          item.x -= 1.5;
+          ctx.drawImage(itemImgs[item.type], item.x, item.y, item.width, item.height);
+
+          const isColliding =
+            player.x < item.x + item.width &&
+            player.x + player.width > item.x &&
+            player.y < item.y + item.height &&
+            player.y + player.height > item.y;
+
+          if (isColliding) {
+            gameStateRef.current.score[item.type]++;
+            return false;
+          }
+          return item.x + item.width > 0;
+        });
+
+        if (gameStateRef.current.lives <= 0) {
+          navigate('/result', {
+            state: {
+              score: gameStateRef.current.score,
+              lives: gameStateRef.current.lives,
+            },
+          });
+          return;
+        }
+
+        drawIcons(
+          ctx,
+          ITEM_TYPES.map((type) => [itemImgs[type], gameStateRef.current.score[type]]),
+          ICON
+        );
+
+        drawPixelBar(
+          ctx,
+          BAR.lives.x+40,
+          BAR.lives.y,
+          BAR.width,
+          BAR.height,
+          gameStateRef.current.lives / MAX_LIVES,
+          ['#FF6D45', '#FF7E5A', '#FB977B'], 
+          lifeImg// 用 item1 當作血條圖示
+        );
+
+
+        drawPixelBar(
+          ctx,
+          BAR.time.x + 40,
+          BAR.time.y,
+          BAR.width,
+          BAR.height,
+          (GAME_DURATION - gameStateRef.current.distance) / GAME_DURATION,
+          ['#FB8F13', '#FF9822', '#FFA43D'], 
+          goalImg // 用 item1 當作血條圖示
+        );
+
 
         requestRef.current = requestAnimationFrame(gameLoop);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      };
 
-    // 清理機制：組件卸載時取消動畫更新
+      requestRef.current = requestAnimationFrame(gameLoop);
+    });
+
     return () => {
       isMounted = false;
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, [navigate]);
 
-  // 起跳事件：直接更新 gameStateRef 中的主角垂直速度
   const handleJump = () => {
     if (!jumping) {
       setJumping(true);
@@ -174,10 +224,15 @@ function GamePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-200">
-      <canvas ref={canvasRef} width="400" height="600" className="border bg-white" />
-      <button onClick={handleJump} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
-        起跳
+    <div className="relative flex flex-col items-center justify-center h-screen bg-[#FCB1B2]"  style={{
+      backgroundImage: `url(${IMAGE_PATHS.bg})`,
+    }}>
+      <canvas ref={canvasRef} width="350" height="600" className="mt-3 border border-4 border-amber-950 rounded-2xl bg-white" />
+      <button
+        onClick={handleJump}
+        className="p-6  mt-5 w-[350px] shadow-2xl border-rose-600 border-8 font-bold text-3xl bg-red-400 text-white rounded-lg active:bg-rose-500"
+      >
+        跳躍！
       </button>
     </div>
   );
