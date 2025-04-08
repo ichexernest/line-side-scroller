@@ -56,14 +56,14 @@ function ResultPage() {
         <>
           <img className='max-w-[350px] h-auto' src={isSuccessA ? IMAGE_PATHS.success2 : IMAGE_PATHS.success1} alt="" />
 
-          <div className='flex w-[350px] gap-2 justify-between items-center p-3 m-3 bg-white rounded-2xl'>
+          {/* <div className='flex w-[350px] gap-2 justify-between items-center p-3 m-3 bg-white rounded-2xl'>
             {Object.keys(score).map((propKey) => (
               <div key={propKey} className='flex flex-col items-center justify-center'>
                 <img className='max-w-[40px] h-auto' src={IMAGE_PATHS.items[propKey]} alt="" />
                 <p className="mb-2">{score[propKey]}</p>
               </div>
             ))}
-          </div>
+          </div> */}
 
           <p>9折優惠碼，可用於所有商品：</p>
           <p className='font-bold text-2xl'>GOODMOTHERSDAY2025</p>
