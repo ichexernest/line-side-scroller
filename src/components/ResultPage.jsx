@@ -79,29 +79,30 @@ function ResultPage() {
             {btnMessage}
           </button>
 
-          <button
+        </>
+      ) : (
+        <img className='max-w-[350px] h-auto' src={IMAGE_PATHS.fail} alt="失敗圖片" />
+      )}
+      <div className='flex justify-between items-center gap-2'>
+      {lives > 0 && (<button
             onClick={() => window.location.href = "https://goodmoods.store/shop/"}
-            className={`p-5 mt-5 font-bold text-3xl text-white rounded-lg transition-all duration-300 ${
+            className={`p-5 mt-3 font-bold text-2xl text-white rounded-lg transition-all duration-300 ${
               canRetry ? 'bg-amber-500 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'
             }`}
             disabled={!canRetry}
           >
             前往逛逛選購
-          </button>
-        </>
-      ) : (
-        <img className='max-w-[350px] h-auto' src={IMAGE_PATHS.fail} alt="失敗圖片" />
-      )}
-
+          </button>)}
       <button
         onClick={() => canRetry && navigate('/')}
-        className={`p-5 mt-3 font-bold text-3xl text-white rounded-lg transition-all duration-300 ${
+        className={`p-5 mt-3 font-bold text-2xl text-white rounded-lg transition-all duration-300 ${
           canRetry ? 'bg-red-400 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'
         }`}
         disabled={!canRetry}
       >
         再試一次！
       </button>
+      </div>
     </div>
   );
 }

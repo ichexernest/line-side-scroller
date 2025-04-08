@@ -20,7 +20,7 @@ function GamePage() {
   const startTimeRef = useRef(null);
 
   const gameStateRef = useRef({
-    player: { x: 50, y: 500, width: 50, height: 90, vy: 0 },
+    player: { x: 50, y: 450, width: 50, height: 90, vy: 0 },
     obstacles: [],
     items: [],
     spawnCounter: 0,
@@ -77,13 +77,13 @@ const lifeImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length];
 const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1]; 
 
       const spawnObstacle = (type) => {
-        gameStateRef.current.obstacles.push({ x: canvas.width, y: 550, width: 40, height: 40, type });
+        gameStateRef.current.obstacles.push({ x: canvas.width, y: 500, width: 40, height: 40, type });
       };
 
       const spawnItem = (type) => {
         gameStateRef.current.items.push({
           x: canvas.width,
-          y: 500 - Math.random() * 150,
+          y: 450 - Math.random() * 150,
           width: 50,
           height: 50,
           type,
@@ -112,8 +112,8 @@ const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1];
         const player = gameStateRef.current.player;
         player.vy += gravity;
         player.y += player.vy;
-        if (player.y > 500) {
-          player.y = 500;
+        if (player.y > 450) {
+          player.y = 450;
           player.vy = 0;
           setJumping(false);
         }
@@ -236,12 +236,12 @@ const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1];
         <canvas
           ref={canvasRef}
           width="350"
-          height="600"
+          height="550"
           className="mt-3 border border-4 border-amber-950 rounded-2xl bg-[#F07C7E]"
         />
         <button
           onClick={handleJump}
-          className="p-6 mt-5 w-[350px] shadow-2xl border-rose-600 border-8 font-bold text-3xl bg-red-400 text-white rounded-lg active:bg-rose-500"
+          className="p-6 mt-5 w-[350px] shadow-2xl border-rose-600 border-8 font-bold text-3xl bg-red-400 text-white rounded-2xl active:bg-rose-500"
         >
           跳起來!
         </button>
