@@ -44,4 +44,5 @@ export const IMAGE_PATHS = {
   success2: '/assets/successCard2.png',
   fail: '/assets/failCard.png',
   bg: '/assets//bg-mtd.png',
+  start: '/assets//start.png',
 };

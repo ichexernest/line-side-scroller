@@ -11,7 +11,7 @@ function HomePage() {
     style={{
       backgroundImage: `url(${IMAGE_PATHS.bg})`,
     }}>
-      <h1 className="text-4xl font-bold mb-4">歡迎開始遊戲</h1>
+      <img src={IMAGE_PATHS.start} className='w-[350px] h-auto my-5' alt="" />
       <button
         onClick={() => navigate('/game')}
         className="p-6  mt-5 font-bold text-3xl bg-red-400 text-white rounded-lg"
