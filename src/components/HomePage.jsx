@@ -31,7 +31,8 @@ function HomePage() {
         backgroundPosition: 'center',
       }}
     >
-      <img src={IMAGE_PATHS.start} className="w-[350px] h-auto my-3" alt="" />
+      <img src={IMAGE_PATHS.start} className="w-[350px] h-auto" alt="" />
+      <p className='text-xs my-1 text-red-800'>網路和裝置解析度有可能影響遊玩情況，敬請注意。</p>
       <button
         onClick={() => navigate('/game')}
         className="p-6 mt-3 font-bold text-3xl bg-red-400 text-white rounded-lg"
