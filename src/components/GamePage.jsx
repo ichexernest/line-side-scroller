@@ -13,7 +13,7 @@ import {
 import {  drawPixelBar, drawIcons } from '../images/drawUtils';
 
 function GamePage() {
-  // const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
   const requestRef = useRef();
@@ -208,8 +208,9 @@ const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1];
 
         requestRef.current = requestAnimationFrame(gameLoop);
       };
-
+      setLoaded(true);
       requestRef.current = requestAnimationFrame(gameLoop);
+
     });
 
     return () => {
@@ -229,9 +230,12 @@ const goalImg = restImgs[OBSTACLE_TYPES.length + ITEM_TYPES.length + 1];
     <div className="relative flex flex-col items-center justify-center h-screen bg-[#FCB1B2]"  style={{
       backgroundImage: `url(${IMAGE_PATHS.bg})`,
     }}>
-{/* {!loaded ? (
-      <div className="text-3xl text-white font-bold animate-pulse">載入中...</div>
-    ) : ( */}
+      {!loaded && (
+        <div className="absolute flex flex-col pb-10 justify-center items-center text-white font-bold animate-pulse">
+          <p className='text-3xl'>載入中請稍後...!</p>
+          <p className='text-sm'>若等候時間過久，請嘗試切換其他網路遊玩</p>
+        </div>
+      ) }
       <>
         <canvas
           ref={canvasRef}
